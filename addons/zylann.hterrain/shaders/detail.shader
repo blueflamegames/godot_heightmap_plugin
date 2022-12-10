@@ -15,6 +15,7 @@ uniform float u_globalmap_tint_top : hint_range(0.0, 1.0);
 uniform float u_bottom_ao : hint_range(0.0, 1.0);
 uniform vec2 u_ambient_wind; // x: amplitude, y: time
 uniform vec3 u_instance_scale = vec3(1.0, 1.0, 1.0);
+uniform float u_roughness = 0.9;
 
 varying vec3 v_normal;
 varying vec2 v_map_uv;
@@ -56,6 +57,9 @@ void vertex() {
 	float hash = get_hash(obj_pos.xz);
 	
 	if (density > hash) {
+		vec3 normal = normalize(
+			u_terrain_normal_basis * unpack_normal(texture(u_terrain_normalmap, map_uv)));
+		
 		// Snap model to the terrain
 		float height = texture(u_terrain_heightmap, map_uv).r / cell_coords.y;
 		VERTEX *= u_instance_scale;
@@ -68,8 +72,9 @@ void vertex() {
 		float dr = distance(wpos, CAMERA_MATRIX[3].xyz) / u_view_distance;
 		COLOR.a = clamp(1.0 - dr * dr * dr, 0.0, 1.0);
 
-		// When using billboards, the normal is the same as the terrain regardless of face orientation
-		v_normal = normalize(u_terrain_normal_basis * unpack_normal(texture(u_terrain_normalmap, map_uv)));
+		// When using billboards,
+		// the normal is the same as the terrain regardless of face orientation
+		v_normal = normal;
 
 	} else {
 		// Discard, output degenerate triangles
@@ -80,7 +85,7 @@ void vertex() {
 void fragment() {
 	NORMAL = (INV_CAMERA_MATRIX * (WORLD_MATRIX * vec4(v_normal, 0.0))).xyz;
 	ALPHA_SCISSOR = 0.5;
-	ROUGHNESS = 1.0;
+	ROUGHNESS = u_roughness;
 
 	vec4 col = texture(u_albedo_alpha, UV);
 	ALPHA = col.a * COLOR.a;// - clamp(1.4 - UV.y, 0.0, 1.0);//* 0.5 + 0.5*cos(2.0*TIME);
@@ -88,7 +93,7 @@ void fragment() {
 	ALBEDO = COLOR.rgb * col.rgb;
 
 	// Blend with ground color
-	float nh = sqrt(1.0 - UV.y);
+	float nh = sqrt(max(1.0 - UV.y, 0.0));
 	ALBEDO = mix(ALBEDO, texture(u_terrain_globalmap, v_map_uv).rgb, mix(u_globalmap_tint_bottom, u_globalmap_tint_top, nh));
 	
 	// Fake bottom AO

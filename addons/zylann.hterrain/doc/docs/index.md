@@ -127,7 +127,7 @@ As you sculpt, the plugin automatically recomputes normals of the terrain, and s
 You can enable or disable collisions by checking the `Collisions enabled` property in the inspector.
 
 Heightmap-based terrains usually implement collisions directly using the heightmap, which saves a lot of computations compared to a classic mesh collider.
-This plugin depends on the **Bullet Physics** integration in Godot, which does have a height-field collider. **Godot Physics** does not support it, so you may want to make sure Bullet is enabled in your project settings:
+This plugin depends on the **Bullet Physics** integration in Godot, which does have a height-field collider. **Godot Physics** does not support it until version 3.4, so if you use an older version, you may want to make sure Bullet is enabled in your project settings:
 
 ![Screenshot of the option to choose physics engines in project settings](images/choose_bullet_physics.png)
 
@@ -279,7 +279,7 @@ If you use PBR textures, there might be a lot of files to assign. If you use a n
 
 #### Normal maps
 
-As indicated in the [Godot documentation](https://docs.godotengine.org/en/stable/tutorials/3d/spatial_material.html#normal-map), normal maps are expected to use OpenGL convention (X+, Y-, Z+). So it is possible that normalmaps you find online use a different convention.
+As indicated in the [Godot documentation](https://docs.godotengine.org/en/stable/tutorials/3d/spatial_material.html#normal-map), normal maps are expected to use OpenGL convention (X+, Y+, Z+). So it is possible that normalmaps you find online use a different convention.
 
 To help with this, the import tool allows you to flip Y, in case the normalmap uses DirectX convention.
 
@@ -1149,6 +1149,7 @@ This issue happened a few times and had various causes so if the checks mentionn
 - Check the contents of your terrain's data folder. It must contain a `.hterrain` file and a few textures.
 - If they are present, make sure Godot has imported those textures. If it didn't, unfocus the editor, and focus it back (you should see a short progress bar as it does it)
 - Check if you used Ctrl+Z (undo) after a non-undoable action, like described in [issue #101](https://github.com/Zylann/godot_heightmap_plugin/issues/101)
+- Make sure your `res://addons` folder is named `addons` *exactly lowercase*. It should not be named `Addons`. Plugins can fail if this convention is not respected.
 - If your problem relates to collisions in editor, update the collider using `Terrain -> Update Editor Collider`, because this one does not update automatically yet
 - Godot seems to randomly forget where the terrain saver is, but I need help to find out why because I could never reproduce it. See [issue #120](https://github.com/Zylann/godot_heightmap_plugin/issues/120)
 

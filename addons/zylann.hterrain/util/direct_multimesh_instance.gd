@@ -38,3 +38,10 @@ func set_material_override(material: Material):
 func set_aabb(aabb: AABB):
 	VisualServer.instance_set_custom_aabb(_multimesh_instance, aabb)
 
+
+func set_layer_mask(mask: int):
+	VisualServer.instance_set_layer_mask(_multimesh_instance, mask)
+
+
+func set_cast_shadow(cast_shadow: int):
+	VisualServer.instance_geometry_set_cast_shadows_setting(_multimesh_instance, cast_shadow)
